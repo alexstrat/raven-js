@@ -12,7 +12,8 @@ var _Raven = window.Raven,
     globalOptions = {
         logger: 'javascript',
         ignoreErrors: [],
-        ignoreUrls: []
+        ignoreUrls: [],
+        tags: {}
     };
 
 var TK = TraceKit.noConflict();
@@ -436,6 +437,12 @@ function send(data) {
         platform: 'javascript',
         'sentry.interfaces.Http': getHttpData()
     }, data);
+
+    // Merge in the tags separately since arrayMerge doesn't handle a deep merge
+    data.tags = arrayMerge(globalOptions.tags, data.tags);
+
+    // If there are no tags, strip the key from the payload alltogther.
+    if (!data.tags) delete data.tags;
 
     if (globalUser) data['sentry.interfaces.User'] = globalUser;
 
